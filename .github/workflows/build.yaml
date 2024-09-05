@@ -1,0 +1,88 @@
+name: Build and Deploy to Docker Hub and GHCR
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build_binaries:
+    name: ${{ matrix.platform.os_name }} with rust ${{ matrix.toolchain }}
+    runs-on: ${{ matrix.platform.os }}
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: true
+      matrix:
+        platform:
+          - os_name: Linux-aarch64
+            os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            bin: rusty_marzban_metrics_exporter_aarch64
+          - os_name: Linux-x86_64
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            bin: rusty_marzban_metrics_exporter_x86_64
+        toolchain:
+          - stable
+    steps:
+      - uses: actions/checkout@master
+      - name: Build binary
+        uses: houseabsolute/actions-rust-cross@master
+        with:
+          command: "build"
+          target: ${{ matrix.platform.target }}
+          toolchain: ${{ matrix.toolchain }}
+          args: "--locked --release"
+          strip: true
+      - name: Rename binary (linux and macos)
+        run: |
+          mkdir -p app/${{ matrix.platform.target }}
+          mv target/${{ matrix.platform.target }}/release/marzban_exporter app/${{ matrix.platform.target }}/${{ matrix.platform.bin }}
+      - name: Generate SHA-256
+        run: shasum -a 256 app/${{ matrix.platform.target }}/${{ matrix.platform.bin }} | cut -d ' ' -f 1 > app/${{ matrix.platform.target }}/${{ matrix.platform.bin }}.sha256
+      - name: Release binary and SHA-256 checksum to GitHub
+        uses: softprops/action-gh-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          files: |
+            app/${{ matrix.platform.target }}/${{ matrix.platform.bin }}
+            app/${{ matrix.platform.target }}/${{ matrix.platform.bin }}.sha256
+
+  build_docker_images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@master
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@master
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@master
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push multi-architecture image
+        uses: docker/build-push-action@master
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            expl0it99/rusty_marzban_metrics_exporter:latest
+            ghcr.io/${{ github.repository }}/rusty_marzban_metrics_exporter:latest
