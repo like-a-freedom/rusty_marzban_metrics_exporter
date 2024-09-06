@@ -19,5 +19,9 @@ pub async fn serve_metrics(registry: Arc<Registry>) {
 
     axum::serve(tcp, router).await.unwrap();
 
-    println!("Serving metrics on IP: {} port: {}", addr.ip(), addr.port());
+    println!(
+        "Serving metrics on IP: {}:{}/metrics",
+        addr.ip(),
+        addr.port()
+    );
 }
