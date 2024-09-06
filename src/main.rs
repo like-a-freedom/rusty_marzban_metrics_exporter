@@ -12,6 +12,7 @@ async fn main() -> Result<(), APIError> {
     dotenv::dotenv().ok();
 
     // Initialize API client and metrics registry
+    println!("Starting fetch Marzban URL: {}", env::var("URL").unwrap());
     let api_client = Arc::new(api::MarzbanAPI::new().await?);
     let registry = Arc::new(metrics::setup_metrics_registry());
 

@@ -8,6 +8,8 @@
 **.Dockerfile
 .pytest_cache
 docker-compose.yaml
+docker-compose.dev.yaml
+.env.dev
 
 ################################################################################
 # Rust

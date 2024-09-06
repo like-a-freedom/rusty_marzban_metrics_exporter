@@ -13,9 +13,11 @@ pub async fn serve_metrics(registry: Arc<Registry>) {
             async move { metrics::gather_metrics_output(&registry) }
         }),
     );
-
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8050));
+    let port = 8050;
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     let tcp = TcpListener::bind(&addr).await.unwrap();
 
     axum::serve(tcp, router).await.unwrap();
+
+    println!("Serving metrics on IP: {} port: {}", addr.ip(), addr.port());
 }

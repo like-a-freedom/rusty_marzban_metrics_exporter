@@ -48,6 +48,7 @@ impl From<reqwest::Error> for APIError {
         }
     }
 }
+
 #[derive(Deserialize)]
 pub struct TokenResponse {
     access_token: String,
@@ -121,37 +122,22 @@ impl MarzbanAPI {
         let password = env::var("PASSWORD").expect("PASSWORD environment variable must be set");
 
         let client = Client::new();
-        let token_response: Result<TokenResponse, reqwest::Error> = client
+        let token_response = client
             .post(&format!("{}/api/admin/token", url))
             .form(&[("username", &username), ("password", &password)])
             .send()
             .await?
-            .json()
-            .await;
+            .json::<TokenResponse>()
+            .await
+            .map_err(|e| {
+                let response_text = format!("Failed to decode token response: {}", e);
+                APIError::InvalidResponse(response_text)
+            })?;
 
-        match token_response {
-            Ok(token) => Ok(Self {
-                client,
-                token: token.access_token,
-            }),
-            Err(e) => {
-                let response_text = client
-                    .post(&format!("{}/api/admin/token", url))
-                    .form(&[("username", &username), ("password", &password)])
-                    .send()
-                    .await?
-                    .text()
-                    .await?;
-                eprintln!(
-                    "Failed to decode token response. Raw response: {}",
-                    response_text
-                );
-                Err(APIError::InvalidResponse(format!(
-                    "Failed to fetch token: {}",
-                    e
-                )))
-            }
-        }
+        Ok(Self {
+            client,
+            token: token_response.access_token,
+        })
     }
 
     pub async fn fetch<T: for<'de> Deserialize<'de>>(&self, endpoint: &str) -> Result<T, APIError> {

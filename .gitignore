@@ -1,2 +1,5 @@
 /target
 .pytest_cache
+.env
+.env.dev
+docker-compose.dev.yaml
