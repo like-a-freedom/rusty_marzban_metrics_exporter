@@ -1,6 +1,7 @@
 services:
   marzban_metrics_exporter:
     platform: "linux/arm64" # "linux/amd64"
+    # Or use image: ghcr.io/like-a-freedom/rusty_marzban_metrics_exporter:latest
     build: .
     image: rusty_marzban_metrics_exporter
     container_name: rusty_marzban_metrics_exporter

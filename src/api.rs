@@ -134,10 +134,23 @@ impl MarzbanAPI {
                 client,
                 token: token.access_token,
             }),
-            Err(e) => Err(APIError::InvalidResponse(format!(
-                "Failed to fetch token: {}",
-                e
-            ))),
+            Err(e) => {
+                let response_text = client
+                    .post(&format!("{}/api/admin/token", url))
+                    .form(&[("username", &username), ("password", &password)])
+                    .send()
+                    .await?
+                    .text()
+                    .await?;
+                eprintln!(
+                    "Failed to decode token response. Raw response: {}",
+                    response_text
+                );
+                Err(APIError::InvalidResponse(format!(
+                    "Failed to fetch token: {}",
+                    e
+                )))
+            }
         }
     }
 
