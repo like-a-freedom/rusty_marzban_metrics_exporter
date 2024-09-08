@@ -7,6 +7,11 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::interval;
 
+use mimalloc::MiMalloc;
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
+
 #[tokio::main]
 async fn main() -> Result<(), APIError> {
     dotenv::dotenv().ok();
