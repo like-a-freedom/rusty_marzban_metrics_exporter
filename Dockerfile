@@ -12,7 +12,10 @@ COPY . .
 ARG TARGETARCH TARGETPLATFORM
 RUN echo "Building for ${TARGETARCH} on ${TARGETPLATFORM}"
 RUN if [ "${TARGETARCH}" = "arm64" ]; then \
-    rustup target add aarch64-unknown-linux-musl \
+    export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-musl-gcc \
+    && export CC=aarch64-linux-musl-gcc \
+    && export RUSTFLAGS="-C target-feature=+crt-static" \
+    && rustup target add aarch64-unknown-linux-musl \
     && cargo build --release --target aarch64-unknown-linux-musl \
     && mv ./target/aarch64-unknown-linux-musl/release/marzban_exporter . \
     && strip marzban_exporter; \
@@ -29,3 +32,7 @@ COPY --from=builder /app/marzban_exporter /usr/local/bin/marzban_exporter
 EXPOSE 8050
 USER 1000:1000
 ENTRYPOINT ["/usr/local/bin/marzban_exporter"]
+
+# [target.aarch64-unknown-linux-musl]
+# linker = "aarch64-linux-musl-gcc"
+# rustflags = ["-C", "target-feature=-crt-static"]
