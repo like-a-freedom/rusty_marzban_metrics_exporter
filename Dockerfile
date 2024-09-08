@@ -2,7 +2,7 @@
 # If you want to cross-compile, try compiling on messense/cargo-zigbuild - https://github.com/rust-cross/cargo-zigbuild
 # Like cargo zigbuild --release --target for x86_64-unknown-linux-musl
 
-FROM --platform=$BUILDPLATFORM rust:slim AS builder
+FROM --platform=${BUILDPLATFORM:-linux/amd64} rust:slim AS builder
 RUN apt update && apt install -y --no-install-recommends \
     musl-tools musl-dev clang llvm perl cmake\
     &&rm -rf /var/lib/apt/lists/*
@@ -33,7 +33,3 @@ COPY --from=builder /app/marzban_exporter /usr/local/bin/marzban_exporter
 EXPOSE 8050
 USER 1000:1000
 ENTRYPOINT ["/usr/local/bin/marzban_exporter"]
-
-# [target.aarch64-unknown-linux-musl]
-# linker = "aarch64-linux-musl-gcc"
-# rustflags = ["-C", "target-feature=-crt-static"]
