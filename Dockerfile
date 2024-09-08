@@ -14,7 +14,8 @@ RUN echo "Building for ${TARGETARCH} on ${TARGETPLATFORM}"
 RUN if [ "${TARGETARCH}" = "arm64" ]; then \
     export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-musl-gcc \
     && export CC=aarch64-linux-musl-gcc \
-    && export RUSTFLAGS="-C target-feature=+crt-static" \
+    && export PKG_CONFIG_ALLOW_CROSS=1 \
+    && export RUSTFLAGS="-Ctarget-feature=+crt-static" \
     && rustup target add aarch64-unknown-linux-musl \
     && cargo build --release --target aarch64-unknown-linux-musl \
     && mv ./target/aarch64-unknown-linux-musl/release/marzban_exporter . \
