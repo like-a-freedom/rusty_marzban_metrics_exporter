@@ -14,10 +14,10 @@ ARG TARGETARCH TARGETPLATFORM
 RUN echo "Building for ${TARGETARCH} on ${TARGETPLATFORM}"
 
 RUN if [ "${TARGETARCH}" = "arm64" ]; then \
-    export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-musl-gcc \
-    && export CC=aarch64-linux-musl-gcc \
-    && export PKG_CONFIG_ALLOW_CROSS=1 \
-    && export RUSTFLAGS="-Ctarget-feature=+crt-static" \
+    export CC=aarch64-linux-musl-gcc \
+    && export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc \
+    # && export PKG_CONFIG_ALLOW_CROSS=1 \
+    # && export RUSTFLAGS="-Ctarget-feature=+crt-static" \
     && rustup target add aarch64-unknown-linux-musl \
     && cargo build --release --target aarch64-unknown-linux-musl \
     && mv ./target/aarch64-unknown-linux-musl/release/marzban_exporter . \
@@ -27,13 +27,13 @@ RUN if [ "${TARGETARCH}" = "arm64" ]; then \
 RUN if [ "${TARGETARCH}" = "amd64" ]; then \
     export CC_x86_64_unknown_linux_musl=clang \
     && export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-Clink-self-contained=yes -Clinker=rust-lld" \
-    && export TARGET_CC=x86_64-linux-musl-gcc \
-    && export RUSTFLAGS="-Ctarget-feature=-crt-static" \
-    && export HOST_CC=gcc \
-    && export CC_x86_64_unknown_linux_gnu=/usr/bin/x86_64-linux-gnu-gcc \
-    && export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=clang \
-    && export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=/usr/bin/x86_64-linux-gnu-gcc \
-    && export RUSTFLAGS='-C linker=x86_64-linux-gnu-gcc' \
+    # && export TARGET_CC=x86_64-linux-musl-gcc \
+    # && export RUSTFLAGS="-Ctarget-feature=-crt-static" \
+    # && export HOST_CC=gcc \
+    # && export CC_x86_64_unknown_linux_gnu=/usr/bin/x86_64-linux-gnu-gcc \
+    # && export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=clang \
+    # && export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=/usr/bin/x86_64-linux-gnu-gcc \
+    # && export RUSTFLAGS='-C linker=x86_64-linux-gnu-gcc' \
     && rustup target add x86_64-unknown-linux-musl \
     && cargo build --release --target x86_64-unknown-linux-musl \
     && mv ./target/x86_64-unknown-linux-musl/release/marzban_exporter . ;\
