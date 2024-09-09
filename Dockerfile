@@ -14,8 +14,10 @@ ARG TARGETARCH TARGETPLATFORM
 RUN echo "Building for ${TARGETARCH} on ${TARGETPLATFORM}"
 
 RUN if [ "${TARGETARCH}" = "arm64" ]; then \
-    export CC=aarch64-linux-musl-gcc \
-    && export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc \
+    export CC_aarch64_unknown_linux_musl=clang \
+    && export AR_aarch64_unknown_linux_musl=llvm-ar \
+    && export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-Clink-self-contained=yes -Clinker=rust-lld" \
+    # && export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-musl-gcc \
     # && export PKG_CONFIG_ALLOW_CROSS=1 \
     # && export RUSTFLAGS="-Ctarget-feature=+crt-static" \
     && rustup target add aarch64-unknown-linux-musl \
