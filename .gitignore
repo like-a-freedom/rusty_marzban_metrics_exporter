@@ -3,3 +3,4 @@
 .env
 .env.dev
 docker-compose.dev.yaml
+.cargo/*

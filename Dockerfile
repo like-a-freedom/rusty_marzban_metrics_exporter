@@ -4,8 +4,9 @@
 
 FROM --platform=${BUILDPLATFORM:-linux/amd64} rust:slim AS builder
 RUN apt update && apt install -y --no-install-recommends \
-    musl-tools musl-dev clang llvm perl cmake\
+    musl-tools musl-dev clang llvm perl cmake \
     &&rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y gcc-i686-linux-gnu gcc-x86-64-linux-gnu
 RUN update-ca-certificates
 WORKDIR /app
 COPY . .
@@ -22,10 +23,18 @@ RUN if [ "${TARGETARCH}" = "arm64" ]; then \
     && strip marzban_exporter; \
     else \
     export CC_x86_64_unknown_linux_musl=clang \
+    && export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-Clink-self-contained=yes -Clinker=rust-lld" \
+    # && export TARGET_CC=x86_64-linux-musl-gcc \
+    # export RUSTFLAGS="-Ctarget-feature=-crt-static" \
+    # && export HOST_CC=gcc \
+    # && export CC_x86_64_unknown_linux_gnu=/usr/bin/x86_64-linux-gnu-gcc \
+    # && export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=clang \
+    # && export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=/usr/bin/x86_64-linux-gnu-gcc \
+    # && export RUSTFLAGS='-C linker=x86_64-linux-gnu-gcc' \
     && rustup target add x86_64-unknown-linux-musl \
     && cargo build --release --target x86_64-unknown-linux-musl \
-    && mv ./target/x86_64-unknown-linux-musl/release/marzban_exporter . \
-    && strip marzban_exporter; \
+    && mv ./target/x86_64-unknown-linux-musl/release/marzban_exporter . ;\
+    # && strip marzban_exporter; \
     fi
 
 FROM gcr.io/distroless/cc-debian12
