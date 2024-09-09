@@ -159,7 +159,7 @@ impl MarzbanAPI {
         );
         let token_response = self
             .client
-            .post(&format!("{}/api/admin/token", self.base_url))
+            .post(format!("{}/api/admin/token", self.base_url))
             .form(&[("username", &self.username), ("password", &self.password)])
             .send()
             .await
