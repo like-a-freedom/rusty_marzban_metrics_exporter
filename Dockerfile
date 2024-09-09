@@ -21,7 +21,8 @@ RUN if [ "${TARGETARCH}" = "arm64" ]; then \
     && rustup target add aarch64-unknown-linux-musl \
     && cargo build --release --target aarch64-unknown-linux-musl \
     && mv ./target/aarch64-unknown-linux-musl/release/marzban_exporter . \
-    && strip marzban_exporter;
+    && strip marzban_exporter; \
+    fi
 
 RUN if [ "${TARGETARCH}" = "amd64" ]; then \
     export CC_x86_64_unknown_linux_musl=clang \
