@@ -55,7 +55,10 @@ async fn update_metrics_periodically(
     api_client: &Arc<api::MarzbanAPI>,
     metrics: &Arc<metrics::Metrics>,
 ) -> Result<(), APIError> {
-    // Fetch data
+    // Ensure token is valid before making any API calls
+    api_client.ensure_token().await?;
+
+    // Fetch data after ensuring the token is valid
     let nodes = api_client.fetch_nodes_data().await?;
     let node_usages = api_client.fetch_nodes_usage_data().await?;
     let system_data = api_client.fetch_system_data().await?;

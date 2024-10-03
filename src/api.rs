@@ -188,7 +188,7 @@ impl MarzbanAPI {
     }
 
     // Ensures that a valid token is available. Fetches a new one if necessary.
-    async fn ensure_token(&self) -> Result<String, APIError> {
+    pub async fn ensure_token(&self) -> Result<String, APIError> {
         {
             let token_guard = self.token.read().await;
             if let Some(ref token) = *token_guard {
