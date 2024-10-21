@@ -69,6 +69,9 @@ You can also run the exporter using Docker. Ensure that Docker is installed on y
 docker build -t rusty_marzban_metrics_exporter .
 docker run --env-file .env -p 8080:8080 rusty_marzban_metrics_exporter
 ```
+You can pull images from
+- Github: `docker pull ghcr.io/like-a-freedom/rusty_marzban_metrics_exporter:latest`
+- Docker Hub: `docker push expl0it99/rusty_marzban_metrics_exporter:latest`
 
 Also check `docker-compose.yaml` in the repository.
 
